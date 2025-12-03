@@ -1,12 +1,12 @@
 const fs = require("fs");
 const path = require("path");
 
+const FILE_PATH = process.argv[2];
 const MIN = 0;
 const MAX = 99;
 const START = 50;
-
 const ROTATIONS = fs
-  .readFileSync(path.join(__dirname, "input.txt"), "utf-8")
+  .readFileSync(path.join(__dirname, FILE_PATH), "utf-8")
   .trim()
   .split("\n");
 
@@ -20,6 +20,8 @@ const ROTATIONS = fs
  */
 function rotate(min, max, start, rotations) {
   let count = 0;
+  let position = start;
+  const range = max - min + 1;
 
   for (let index = 0; index < rotations.length; index++) {
     let rotation = rotations[index];
@@ -27,24 +29,21 @@ function rotate(min, max, start, rotations) {
     const [, direction, clicks] = rotation.match(/([LR])(\d+)/);
 
     const polarity = direction === "L" ? -1 : 1;
-    const steps = parseInt(clicks, 10);
+    const magnitude = parseInt(clicks, 10);
 
-    const range = max - min + 1;
-    const offset = (polarity * steps) % range;
-
-    let position = start + offset;
+    count += Math.floor(magnitude / range);
+    let initial = position;
+    position += (polarity * magnitude) % range;
 
     if (position > max) {
-      position = min + (position - max - 1);
-    } else if (position < min) {
-      position = max - (min - position - 1);
+      count += 1;
+    } else if (position < min && initial !== min) {
+      count += 1;
+    } else if (position === min && polarity === -1) {
+      count += 1;
     }
 
-    if (position === 0) {
-      count++;
-    }
-
-    start = position;
+    position = ((position - min + range) % range) + min;
   }
 
   return count;
