@@ -88,12 +88,17 @@ function solution() {
     let currentEnd = null;
 
     tree.forEach((interval) => {
+      // If no current interval, start a new one
       if (currentStart === null) {
         currentStart = interval[0];
         currentEnd = interval[1];
-      } else if (interval[0] <= currentEnd + 1) {
+      }
+      // If overlapping or contiguous, extend the current interval
+      else if (interval[0] <= currentEnd + 1) {
         currentEnd = Math.max(currentEnd, interval[1]);
-      } else {
+      }
+      // Otherwise, finalize the current interval and start a new one
+      else {
         total += currentEnd - currentStart + 1;
         currentStart = interval[0];
         currentEnd = interval[1];
