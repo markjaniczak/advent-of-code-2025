@@ -61,6 +61,8 @@ class IntervalTree {
 }
 
 function solution() {
+  console.time("solution-time");
+
   const lines = fs
     .readFileSync(path.join(__dirname, FILE_PATH), "utf-8")
     .trim()
@@ -109,6 +111,8 @@ function solution() {
       total += currentEnd - currentStart + 1;
     }
 
+    console.timeEnd("solution-time");
+
     return total;
   }
 
@@ -122,6 +126,9 @@ function solution() {
       total += 1;
     }
   }
+
+  console.timeEnd("solution-time");
+  
   return total;
 }
 
