@@ -9,6 +9,11 @@ function solution(lines) {
 
   const root = [Math.floor(lines[0].length / 2), 0];
 
+  /**
+   * 
+   * @param {[number, number]} node 
+   * @returns {string}
+   */
   function generateKey(node) {
     const [x, y] = node;
     return `${x},${y}`;
@@ -84,6 +89,12 @@ function solution(lines) {
     return graph.size - 1;
   }
 
+  /**
+   * 
+   * @param {[number, number]} node 
+   * @param {Map<string, number>} memo 
+   * @returns {number}
+   */
   function traverse(node, memo) {
     const key = generateKey(node);
 
@@ -93,6 +104,9 @@ function solution(lines) {
 
     let total = 0;
 
+    /**
+     * @type {[number, number][]}
+     */
     const children = graph.get(key);
 
     for (const child of children) {
