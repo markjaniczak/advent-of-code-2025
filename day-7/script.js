@@ -4,46 +4,115 @@ const path = require("path");
 const FILE_PATH = process.argv[2];
 const IS_PART_TWO = process.argv[3] === "true";
 
-function solution() {
-  const lines = fs
-    .readFileSync(path.join(__dirname, FILE_PATH), "utf-8")
-    .trim()
-    .split("\n");
+function solution(lines) {
+  lines = lines.trim().split("\n");
 
-  let total = 0;
+  const root = [Math.floor(lines[0].length / 2), 0];
 
-  let beams = new Set([Math.floor(lines[0].length / 2)]);
+  function generateKey(node) {
+    const [x, y] = node;
+    return `${x},${y}`;
+  }
 
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i];
-    const splitters = new Set();
+  /**
+   * @type {Map<number, string[]>}
+   */
+  const beams = new Map([[root[0], [generateKey(root)]]]);
 
-    for (let j = 0; j < line.length; j++) {
-      const char = line[j];
+  /**
+   * @type {Map<string, [number, number][]>}
+   */
+  const graph = new Map([]);
 
-      if (char === "^") {
-        splitters.add(j);
+  let splits = 0;
+
+  for (let y = 1; y < lines.length; y++) {
+    const line = lines[y];
+
+    for (let x = 0; x < line.length; x++) {
+      const cell = line[x];
+
+      // Finalize beams at the bottom row
+      if (y === lines.length - 1) {
+        beams.forEach((parentKeys, beamX) => {
+          for (const parentKey of parentKeys) {
+            if (!graph.has(parentKey)) {
+              graph.set(parentKey, []);
+            }
+
+            graph.get(parentKey).push([beamX, y]);
+          }
+        });
+        break;
       }
-    }
 
-    for (const index of splitters) {
-      if (!beams.has(index)) {
+      // Skip if not a splitter or no beams present
+      if (cell !== "^" || !beams.has(x)) {
         continue;
       }
 
-      beams.delete(index);
+      const parentKeys = beams.get(x);
 
-      const left = index - 1;
-      const right = index + 1;
+      for (const parentKey of parentKeys) {
+        if (!graph.has(parentKey)) {
+          graph.set(parentKey, []);
+        }
+      }
 
-      total += 1;
+      for (const parentKey of parentKeys) {
+        graph.get(parentKey).push([x, y]);
+      }
 
-      beams.add(left);
-      beams.add(right);
+      splits++;
+
+      // Splitter consumes the beam
+      beams.delete(x);
+
+      const left = x - 1;
+      const right = x + 1;
+
+      const node = [x, y];
+
+      const key = generateKey(node);
+
+      const leftBeams = beams.get(left) ?? [];
+      const rightBeams = beams.get(right) ?? [];
+
+      beams.set(left, [...leftBeams, key]);
+      beams.set(right, [...rightBeams, key]);
     }
   }
 
-  return total;
+  if (!IS_PART_TWO) {
+    return splits;
+  }
+
+  function traverse(node, memo) {
+    const key = generateKey(node);
+
+    if (!graph.has(key)) {
+      return 1;
+    }
+
+    let total = 0;
+
+    const children = graph.get(key);
+
+    for (const child of children) {
+      const childKey = generateKey(child);
+      total += memo.get(childKey) ?? traverse(child, memo);
+    }
+
+    memo.set(key, total);
+
+    return total;
+  }
+
+  return traverse(root, new Map());
 }
 
-console.log(solution());
+const lines = fs.readFileSync(path.join(__dirname, FILE_PATH), "utf-8");
+
+console.time("solution-time");
+console.log(solution(lines));
+console.timeEnd("solution-time");
