@@ -24,8 +24,6 @@ function solution(lines) {
    */
   const graph = new Map([]);
 
-  let splits = 0;
-
   for (let y = 1; y < lines.length; y++) {
     const line = lines[y];
 
@@ -63,8 +61,6 @@ function solution(lines) {
         graph.get(parentKey).push([x, y]);
       }
 
-      splits++;
-
       // Splitter consumes the beam
       beams.delete(x);
 
@@ -84,7 +80,8 @@ function solution(lines) {
   }
 
   if (!IS_PART_TWO) {
-    return splits;
+    // Remove the root node from the count
+    return graph.size - 1;
   }
 
   function traverse(node, memo) {
